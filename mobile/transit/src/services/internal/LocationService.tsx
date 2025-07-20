@@ -89,8 +89,8 @@ export async function getUserCurrentLocation(): Promise<Location> {
         });
 
         return {
-            longitude: location.coords.latitude,
-            latitude: location.coords.longitude,
+            longitude: location.coords.longitude,
+            latitude: location.coords.latitude,
             address: '', 
         };
     } catch (error) {
