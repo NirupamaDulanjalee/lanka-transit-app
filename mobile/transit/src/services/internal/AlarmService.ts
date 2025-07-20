@@ -119,9 +119,9 @@ export async function regenerateLocationAlarmConfigs(): Promise<void> {
     const setAlarmPromises = alarms.map(async (alarm) => {
         if (!alarm.isDisabled) {
             const alarmLocation = await AlarmDAO.getLocation(alarm.alarmId);
-            const myNotifiyngDistances = await AlarmDAO.getNotifyingDistances(alarm.alarmId);
+            const myNotifyingDistances = await AlarmDAO.getNotifyingDistances(alarm.alarmId);
 
-            myNotifiyngDistances.forEach(notifyingDistance => {
+            myNotifyingDistances.forEach(notifyingDistance => {
                 activeAlarms.push({
                     displayName: alarm.displayName,
                     address: alarm.address,
