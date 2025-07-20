@@ -106,7 +106,7 @@ async function updateAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
 
 /**
  * @function regenerateLocationAlarmConfigs
- * Regenerates the location alarm configurations for all alarms active alarms.
+ * Regenerates the location alarm configurations for all active alarms.
  * This will be used by headless Alarm service
  * @see src\services\headless\HeadlessAlarmService.tsx
  * 
