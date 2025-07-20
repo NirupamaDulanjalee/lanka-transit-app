@@ -3,8 +3,9 @@
 import { AlarmDAO } from "../../data/daos/AlarmDAO";
 import { convertToMeters } from "../../data/helpers/UnitConverter";
 import { AlarmBasic, AlarmComplete } from "../../data/models/Alarm";
-// TODO: import implemented Alarm instead of tmpProtos
-import { Alarm as AlarmConfigTypeAlarm, setAlarmConfig } from "./tmpProtos";
+import { NotifyingDistance } from "../../data/models/NotifyingDistance";
+import { Alarm as AsyncAlarmConfig_Alarm } from "../headless/models/AsyncAlarmConfig";
+import { setAlarmConfig } from "../headless/storage/alarmConfigStorage";
 
 /**
  * @function getMyAlarmsList
@@ -37,8 +38,10 @@ export async function getDetailedAlarm(alarmId: number): Promise<AlarmComplete> 
  */
 async function createAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
     await AlarmDAO.init();
-    const newId = await AlarmDAO.addAlarm(alarm.displayName, alarm.location, alarm.notifyingDistances);
-    // TODO: update whether alarm is enabled or disabled.
+    const newId = await AlarmDAO.addAlarm(
+            alarm.displayName, 
+            alarm.isDisabled,
+            alarm.location, alarm.notifyingDistances);
     return {
         ...alarm,
         alarmId: newId,
@@ -56,7 +59,46 @@ async function createAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
  */
 async function updateAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
     await AlarmDAO.init();
-    // TODO: Implement the logic to update the alarm in the database.
+    await AlarmDAO.updateAlarm(
+        alarm.alarmId,
+        alarm.displayName,
+        alarm.isDisabled,
+    );
+    // TODO: need a method to update locations
+
+    const notifyingDistancesPrev = await AlarmDAO.getNotifyingDistances(alarm.alarmId);
+    let notifyingDistncesToUpdate:NotifyingDistance[] = [];
+    let notifyingDistancesToInsert:NotifyingDistance[] = [];
+    let notifyingDistancesToDelete:NotifyingDistance[] = [];
+
+    alarm.notifyingDistances.forEach((notifyingDistance) => {
+        const existingDistance = notifyingDistancesPrev.find(
+            (prev) => prev.distance === notifyingDistance.distance && prev.unit === notifyingDistance.unit
+        );
+        if (existingDistance) {
+            notifyingDistncesToUpdate.push(notifyingDistance);
+        } else {
+            notifyingDistancesToInsert.push(notifyingDistance);
+        }
+    });
+
+    notifyingDistancesPrev.forEach((prev) => {
+        const exists = alarm.notifyingDistances.find(
+            (nd) => nd.distance === prev.distance && nd.unit === prev.unit
+        );
+        if (!exists) {
+            notifyingDistancesToDelete.push(prev);
+        }
+    });
+
+    Promise.all(notifyingDistncesToUpdate.map((nd) =>
+        AlarmDAO.updateNotifyingDistance(nd.distanceId, nd.distance, nd.unit)));
+    Promise.all(notifyingDistancesToInsert.map((nd) =>
+        AlarmDAO.addNotifyingDistance(alarm.alarmId, nd.distance, nd.unit)));
+    Promise.all(notifyingDistancesToDelete.map((nd) =>
+        AlarmDAO.deleteNotifyingDistance(nd.distanceId)));
+
+
     return alarm;
 }
 
@@ -72,7 +114,7 @@ async function updateAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
 export async function regenerateLocationAlarmConfigs(): Promise<void> {
     await AlarmDAO.init();
     let alarms = await getMyAlarmsList();
-    let activeAlarms:AlarmConfigTypeAlarm[] = [];
+    let activeAlarms:AsyncAlarmConfig_Alarm[] = [];
     const setAlarmPromises = alarms.map(async (alarm) => {
         if (!alarm.isDisabled) {
             const alarmLocation = await AlarmDAO.getLocation(alarm.alarmId);
