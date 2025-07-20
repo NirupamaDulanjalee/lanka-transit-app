@@ -45,10 +45,21 @@ export default function App() {
     useEffect(() => {
         const prepareApp = async () => {
             try {
+                // Request permissions
+                const fg = await Location.requestForegroundPermissionsAsync();
+                const bg = await Location.requestBackgroundPermissionsAsync();
+
+                if (fg.status !== 'granted' || bg.status !== 'granted') {
+                    Alert.alert('Initialization Error', 'Required location permissions not granted.', [
+                        { text: 'Close', onPress: () => BackHandler.exitApp() },
+                    ]);
+                    return; // Don't proceed
+                }
+
                 // Initialize database
                 await AlarmDAO.init();
 
-                // Set notifee channel
+                // Create Notifee channel
                 await notifee.createChannel({
                     id: 'alarm',
                     name: 'Alarm Notification',
@@ -57,18 +68,18 @@ export default function App() {
                     vibration: true,
                 });
 
-                // Set alarm background task manager
+                // Initialize background task
                 await initLocationTask();
 
-                if (loaded || error) {
+                // If fonts/resources are loaded, launch app
+                if (loaded && !error) {
                     setAppReady(true);
                     await SplashScreen.hideAsync();
                 }
             } catch (err) {
-                console.error('Failed to initialize database:', err);
-                Alert.alert('Initialization Error', 'Failed to initialize the database. ' +
-                    'The app will now exit.', [
-                    {text: 'OK', onPress: () => BackHandler.exitApp()},
+                console.error('App initialization error:', err);
+                Alert.alert('Initialization Error', 'A critical error occurred. The app will now exit.', [
+                    { text: 'OK', onPress: () => BackHandler.exitApp() },
                 ]);
             }
         };
