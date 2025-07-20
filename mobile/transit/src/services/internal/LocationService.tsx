@@ -39,8 +39,8 @@ export async function getCoordinatesFromAddress(address:string): Promise<Locatio
 
 /**
  * @function getAddressesFromCoordinates
- * @param {String|number} lat - Latitude of the location.
- * @param {String|number} lng - Longitude of the location.
+ * @param {Location} location - An object containing the latitude and longitude of the location.
+ * 
  * 
  * @returns {Promise<Location[]>} - A promise that resolves to the address of the coordinates.
  */
