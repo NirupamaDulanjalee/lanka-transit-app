@@ -77,7 +77,7 @@ async function updateAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
             (prev) => prev.distance === notifyingDistance.distance && prev.unit === notifyingDistance.unit
         );
         if (existingDistance) {
-            notifyingDistncesToUpdate.push(notifyingDistance);
+            notifyingDistancesToUpdate.push(notifyingDistance);
         } else {
             notifyingDistancesToInsert.push(notifyingDistance);
         }
