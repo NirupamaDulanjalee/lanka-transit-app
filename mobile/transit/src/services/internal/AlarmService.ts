@@ -92,7 +92,7 @@ async function updateAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
         }
     });
 
-    await Promise.all(notifyingDistncesToUpdate.map((nd) =>
+    await Promise.all(notifyingDistancesToUpdate.map((nd) =>
         AlarmDAO.updateNotifyingDistance(nd.distanceId, nd.distance, nd.unit)));
     await Promise.all(notifyingDistancesToInsert.map((nd) =>
         AlarmDAO.addNotifyingDistance(alarm.alarmId, nd.distance, nd.unit)));
