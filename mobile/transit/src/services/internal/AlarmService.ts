@@ -68,7 +68,7 @@ async function updateAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
     await AlarmDAO.changeLocation(alarm.alarmId, alarm.location);
 
     const notifyingDistancesPrev = await AlarmDAO.getNotifyingDistances(alarm.alarmId);
-    let notifyingDistncesToUpdate:NotifyingDistance[] = [];
+    let notifyingDistancesToUpdate:NotifyingDistance[] = [];
     let notifyingDistancesToInsert:NotifyingDistance[] = [];
     let notifyingDistancesToDelete:NotifyingDistance[] = [];
 
