@@ -68,7 +68,7 @@ export async function getAddressesFromCoordinates(location: Location): Promise<L
 
 /**
  * @function getUserCurrentLocation
- * @returns {Promise<location>} - A promise that resolves to the user's current location.
+ * @returns {Promise<Location>} - A promise that resolves to the user's current location.
  * Get User's Current Location from GPS - withount address component
  */
 
