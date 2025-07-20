@@ -58,7 +58,6 @@ export async function getAddressesFromCoordinates(location: Location): Promise<L
         throw new Error(`Reverse geocoding failed: ${data.status}`);
     }
 
-    location.address = data.results[0].formatted_address;
     const locations: Location[] = data.results.map(result => ({
         latitude: result.geometry.location.lat,
         longitude: result.geometry.location.lng,
