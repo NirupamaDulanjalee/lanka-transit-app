@@ -29,6 +29,9 @@ export async function getCoordinatesFromAddress(address:string): Promise<Locatio
     if (data.status !== "OK"){ 
         throw new Error(`Geocoding failed: ${data.status}`);
     }
+    if (!data.results || data.results.length === 0) {
+        throw new Error("No results found for the given address.");
+    }
     return {
         latitude: data.results[0].geometry.location.lat,
         longitude: data.results[0].geometry.location.lng,
