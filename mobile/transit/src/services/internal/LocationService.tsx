@@ -5,15 +5,9 @@ import { GeoCodingResultsDTO } from "../../data/dtos/GeoCodingResultsDTO";
 import { ReverseGeoCodingResultsDTO } from "../../data/dtos/ReverseGeoCodingResultsDTO";
 import * as ExpoLocation from 'expo-location';
 import { fetch } from 'expo/fetch';
+import { Location } from "../../data/models/Location";
 
-/**
- * Tempory interface Location
- */
-interface Location {
-    latitude: number,
-    longitude: number,
-    address?: string,
-}
+
 /**
  * @function getCoordinatesFromAddress
  * @param {string} address - The address to geocode.
@@ -90,7 +84,6 @@ export async function getUserCurrentLocation(): Promise<Location> {
             throw new Error('Background location permission not granted');
         }
 
-        // Get the current location
         const location = await ExpoLocation.getCurrentPositionAsync({
             accuracy: ExpoLocation.Accuracy.High,
         });
@@ -98,6 +91,7 @@ export async function getUserCurrentLocation(): Promise<Location> {
         return {
             longitude: location.coords.latitude,
             latitude: location.coords.longitude,
+            address: '', 
         };
     } catch (error) {
         throw new Error(`Error retrieving location: ${error.message}`);
