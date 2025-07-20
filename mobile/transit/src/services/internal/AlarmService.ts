@@ -172,7 +172,7 @@ export async function saveAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
  * @returns {Promise<void>} - A promise that resolves when the alarm is deleted.
  */
 export async function deleteAlarm(alarmId: number): Promise<void> {
-    AlarmDAO.init();
+    await AlarmDAO.init();
     await AlarmDAO.deleteAlarm(alarmId);
     await regenerateLocationAlarmConfigs();
 }
