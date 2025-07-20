@@ -12,7 +12,6 @@ import { setAlarmConfig } from "../headless/storage/alarmConfigStorage";
  * @returns {Promise<AlarmBasic[]>} - A promise that resolves to a list of alarms.
  */
 export async function getMyAlarmsList(): Promise<AlarmBasic[]> {
-    await AlarmDAO.init();
     return await AlarmDAO.getAlarms();
 }
 
@@ -24,7 +23,6 @@ export async function getMyAlarmsList(): Promise<AlarmBasic[]> {
  * @returns {Promise<AlarmComplete>} - A promise that resolves to the detailed alarm information.
  */
 export async function getDetailedAlarm(alarmId: number): Promise<AlarmComplete> {
-    await AlarmDAO.init();
     return await AlarmDAO.getAlarm(alarmId);
 }
 
@@ -37,7 +35,6 @@ export async function getDetailedAlarm(alarmId: number): Promise<AlarmComplete> 
  * @returns {Promise<AlarmComplete>} - A promise that resolves to the created alarm.
  */
 async function createAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
-    await AlarmDAO.init();
     const newId = await AlarmDAO.addAlarm(
             alarm.displayName, 
             alarm.isDisabled,
@@ -58,7 +55,6 @@ async function createAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
  * @returns {Promise<AlarmComplete>} - A promise that resolves to the updated alarm.
  */
 async function updateAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
-    await AlarmDAO.init();
     await AlarmDAO.updateAlarm(
         alarm.alarmId,
         alarm.displayName,
@@ -113,7 +109,6 @@ async function updateAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
  * @return {Promise<void>}
  */
 export async function regenerateLocationAlarmConfigs(): Promise<void> {
-    await AlarmDAO.init();
     let alarms = await getMyAlarmsList();
     let activeAlarms:AsyncAlarmConfig_Alarm[] = [];
     const setAlarmPromises = alarms.map(async (alarm) => {
@@ -172,7 +167,6 @@ export async function saveAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
  * @returns {Promise<void>} - A promise that resolves when the alarm is deleted.
  */
 export async function deleteAlarm(alarmId: number): Promise<void> {
-    await AlarmDAO.init();
     await AlarmDAO.deleteAlarm(alarmId);
     await regenerateLocationAlarmConfigs();
 }
