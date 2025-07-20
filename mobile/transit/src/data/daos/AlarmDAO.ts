@@ -54,6 +54,7 @@ export class AlarmDAO {
     // Add alarm
     static async addAlarm(
         name: string,
+        isDisabled: boolean,
         location: Location,
         notifyingDistances: NotifyingDistance[]
     ): Promise<number> {
@@ -63,8 +64,8 @@ export class AlarmDAO {
 
         await this.db.transaction(async (tx) => {
             const [, alarmResult] = await tx.executeSql(
-                'INSERT INTO alarms (display_name) VALUES (?);',
-                [name]
+                'INSERT INTO alarms (display_name, is_disabled) VALUES (?, ?);',
+                [name, isDisabled]
             );
 
             const alarmId = alarmResult.insertId;
@@ -100,6 +101,19 @@ export class AlarmDAO {
         if (!this.db) throw new Error('Local database not initialized');
 
         await this.db.executeSql('DELETE FROM alarms WHERE id = ?;', [alarmId]);
+    }
+
+    // Update an alarm
+    static async updateAlarm(alarmId: number, displayName: string, isDisabled: boolean) {
+        if (!this.db) throw new Error('Local database not initialized');
+
+        await this.db.executeSql(
+            `UPDATE alarms
+             SET display_name = ?,
+                 is_disabled = ?
+             WHERE id = ?;`,
+            [alarmId, displayName, isDisabled]
+        );
     }
 
     // Get an alarm
