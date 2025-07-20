@@ -161,7 +161,7 @@ export async function saveAlarm(alarm: AlarmComplete): Promise<AlarmComplete> {
 
     await regenerateLocationAlarmConfigs();
     
-    return {...updateAlarm} as AlarmComplete;
+    return {...updatedAlarm} as AlarmComplete;
 }
 
 
