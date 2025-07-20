@@ -1,12 +1,34 @@
 import {StatusBar} from 'expo-status-bar';
-import {StyleSheet, Text, View, useColorScheme, Alert, BackHandler} from 'react-native';
+import {StyleSheet, View, useColorScheme, Alert, BackHandler} from 'react-native';
 import MapScreen from './src/screens/MapScreen';
 import {useFonts} from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {useEffect, useState} from 'react';
 import {AlarmDAO} from "./src/data/daos/AlarmDAO";
 import notifee, { AndroidImportance } from '@notifee/react-native';
-import BackgroundFetch from 'react-native-background-fetch';
+import * as Location from 'expo-location';
+import { LOCATION_TASK_NAME } from './src/services/headless/HeadlessAlarmService';
+
+// Method to initialize location task at app startup
+async function initLocationTask() {
+    const { status } = await Location.requestBackgroundPermissionsAsync();
+    if (status !== 'granted') return;
+
+    const started = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
+    if (!started) {
+        await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+            accuracy: Location.Accuracy.Highest,
+            distanceInterval: 50,
+            timeInterval: 60000,
+            showsBackgroundLocationIndicator: true,
+            foregroundService: {
+                notificationTitle: "Wakey Alarm Running",
+                notificationBody: "Tracking your location in background",
+                notificationColor: '#0000ff'
+            }
+        });
+    }
+}
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -29,33 +51,14 @@ export default function App() {
                 // Set notifee channel
                 await notifee.createChannel({
                     id: 'alarm',
-                    name: 'Alarm Channel',
+                    name: 'Alarm Notification',
                     sound: 'default',
                     importance: AndroidImportance.HIGH,
                     vibration: true,
                 });
 
-                // Configure BackgroundFetch
-                BackgroundFetch.configure(
-                    {
-                        minimumFetchInterval: 15, // <-- minutes
-                        stopOnTerminate: false,
-                        startOnBoot: true,
-                        enableHeadless: true,
-                    },
-                    async (taskId) => {
-                        const task = require('./src/background/LocationTask');
-                        await task.checkLocationAndNotify();
-                        BackgroundFetch.finish(taskId);
-                    },
-                    (err) => {
-                        console.error('[BackgroundFetch] Failed to start:', err);
-                        Alert.alert('Initialization Error', 'Failed to start background alarm ' +
-                            'service.', [
-                            {text: 'OK', onPress: () => BackHandler.exitApp()},
-                        ]);
-                    }
-                );
+                // Set alarm background task manager
+                await initLocationTask();
 
                 if (loaded || error) {
                     setAppReady(true);
