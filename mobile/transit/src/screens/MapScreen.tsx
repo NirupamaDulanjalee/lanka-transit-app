@@ -41,11 +41,14 @@ const MapScreen = ({ theme }) => {
         />
       )}
       {activeOverlay === 'alarmControl' && (
-        <AlarmControlOverlay />
+        <AlarmControlOverlay onClose={() => setActiveOverlay('selectLocation')} />
       )}
-      <View style={{ position: 'absolute', top: 50, left: 0, right: 0, zIndex: 1 }}>
-        <SearchBarComponent onSearch={undefined} />
-      </View>
+      {activeOverlay !== 'alarmControl'  && (
+        <View style={{ position: 'absolute', top: 50, left: 0, right: 0, zIndex: 1 }}>
+          <SearchBarComponent onSearch={undefined} />
+        </View>
+      )}
+      
       {activeOverlay !== 'selectLocation' && activeOverlay !== 'alarmControl' && (
         <TouchableOpacity
           style={{ position: 'absolute', bottom: 25, right: 10 }}
