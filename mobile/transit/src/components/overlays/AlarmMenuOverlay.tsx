@@ -4,13 +4,18 @@
 // Works with services/internal/AlarmService
 // Envelopped in OverlayParent.tsx
 
-
-
 import React, { useState } from 'react';
 import {Text,View,TouchableOpacity,Image,FlatList,} from 'react-native';
 import styles from './AlarmMenuOverlay.styles'; 
 
-const AlarmMenuOverlay = ({ visible, onClose }) => {
+type Props = {
+  visible: any;
+  onClose: any;
+  onAddAlarm: () => void;
+};
+
+const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
+  // component
   const [selectedId, setSelectedId] = useState(null);
 
   if (!visible) return null;
@@ -37,6 +42,9 @@ const AlarmMenuOverlay = ({ visible, onClose }) => {
     setSelectedId((prevId) => (prevId === id ? null : id));
   };
 
+  const handleAddAlarm = () => {
+    
+  };
   const renderItem = ({ item }) => {
     const isSelected = selectedId === item.id;
 
@@ -93,7 +101,7 @@ const AlarmMenuOverlay = ({ visible, onClose }) => {
           contentContainerStyle={{ paddingBottom: 60 }}
         />
 
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={onAddAlarm}>
           <Image source={require('../../assets/images/add.png')} />
         </TouchableOpacity>
       </View>

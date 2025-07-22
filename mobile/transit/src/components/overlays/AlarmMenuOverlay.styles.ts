@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '600',
     textAlign: 'left',
+    marginLeft: 10,
   },
   closeIcon: {
     width: 24,
@@ -97,6 +98,7 @@ const styles = StyleSheet.create({
     right: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 10,
   },
 });
 
