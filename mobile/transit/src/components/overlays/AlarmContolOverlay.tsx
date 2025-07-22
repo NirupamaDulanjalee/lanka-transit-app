@@ -4,12 +4,12 @@
 // Styled to match the app's theme
 // Envelopped in OverlayParent.tsx
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import {  Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Pencil,Trash2,ListX, Check, Plus, X  } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './AlarmContolOverlay.styles';
 // Main Alarm Component
-const AlarmControlOverlay = ({onClose}) => {
+const AlarmControlOverlay = ({onClose,onSave}) => {
   const [alarmName, setAlarmName] = useState('Location 1');
   const [location, setLocation] = useState('Galwala Road, Pothanegama...');
   const [distances, setDistances] = useState([
@@ -30,6 +30,9 @@ const AlarmControlOverlay = ({onClose}) => {
     alarms.push(alarmData);
     await AsyncStorage.setItem('alarmData', JSON.stringify(alarms));
     console.log('Alarm saved successfully:', alarmData);
+if (onSave) {
+        onSave();
+      }
 
 
   } catch (e) {

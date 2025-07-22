@@ -45,6 +45,12 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
   const handleAddAlarm = () => {
     
   };
+  const handleDeleteAlarm = () => {
+    console.log('Delete alarm');
+  };
+  const handleEditAlarm = () => {
+    console.log('Edit alarm');
+  };
 
   const renderItem = ({ item }) => {
     const isSelected = selectedId === item.id;
@@ -55,7 +61,7 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
         style={[styles.alarmItem, isSelected && styles.selectedItem]}
         activeOpacity={0.9}
       >
-        <TouchableOpacity style={styles.leftIcon}>
+        <TouchableOpacity onPress={() => handleEditAlarm()} style={styles.leftIcon}>
           <Pencil size={24} strokeWidth={3} color="#333" />
         </TouchableOpacity>
 
@@ -68,7 +74,7 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.deleteButton}>
+        <TouchableOpacity onPress={() => handleDeleteAlarm()} style={styles.deleteButton}>
           <Trash2 />
         </TouchableOpacity>
       </TouchableOpacity>

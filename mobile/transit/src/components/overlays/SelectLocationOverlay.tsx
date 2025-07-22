@@ -4,6 +4,18 @@ import styles from './SelectLocationOverlay.styles';
 import { Plus } from 'lucide-react-native';
 
 const SelectLocationOverlay = ({ onSearch, onAdd }) => {
+    const [showFab,setShowFab] = React.useState(false);
+
+    const handlePickLocation = () => {
+        setShowFab(true);
+    };
+
+    const handleCancel = () => {
+
+        if (onSearch) {
+            onSearch();
+        }
+    };
   const handleFabPress = () => {
     if (onAdd) {
       onAdd();
@@ -16,16 +28,24 @@ const SelectLocationOverlay = ({ onSearch, onAdd }) => {
     <View style={styles.overlayContainer}>
       
       {/* Centered label */}
-      <View style={styles.centerLabelContainer}>
-        <TouchableOpacity><Text style={styles.centerLabel}>Pick a location</Text></TouchableOpacity>
-        <TouchableOpacity><Text style={styles.centerLabel}>Cancel</Text></TouchableOpacity>
-      </View>
+      {!showFab && (
+        <View style={styles.centerLabelContainer} pointerEvents="box-none">
+          <TouchableOpacity onPress={handlePickLocation} activeOpacity={0.7}>
+            <Text style={styles.centerLabel}>Pick a location</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleCancel} activeOpacity={0.7}>
+            <Text style={styles.centerLabel}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       {/* FAB at bottom right */}
-      <View style={styles.fabContainer}>
-        <TouchableOpacity style={styles.fab} onPress={handleFabPress} activeOpacity={0.7}>
-          <Plus size={42} strokeWidth={2} />
-        </TouchableOpacity>
-      </View>
+      {showFab && (
+        <View style={styles.fabContainer}>
+          <TouchableOpacity style={styles.fab} onPress={handleFabPress} activeOpacity={0.7}>
+            <Plus size={42} strokeWidth={2} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
