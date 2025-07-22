@@ -2,9 +2,13 @@
 // ToDo: launch this service at startup if alarms exists in database, disable if not
 
 import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
 import notifee, { AndroidImportance } from '@notifee/react-native';
-import { Audio } from 'expo-av';
-import { getAlarmConfig } from './storage/alarmConfigStorage';
+import { getAlarmConfig, setAlarmConfig } from './storage/alarmConfigStorage';
+import {AlarmConfig} from "./models/AsyncAlarmConfig";
+import {LocationObject} from "expo-location";
+
+export const LOCATION_TASK_NAME = 'LocationTask';
 
 // Calculate distance using Haversine formula
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -21,30 +25,42 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): nu
 }
 
 // Check locations and notify for all configured locations
-export const checkLocationAndNotify = async () => {
-    const config = await getAlarmConfig();
-    if (config.alarms.length < 1) return;
+TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+    if (error) {
+        console.error('Location task error:', error.message);
+        return;
+    }
 
-    const { coords } = await Location.getCurrentPositionAsync({});
+    const locations = (data as { locations: LocationObject[] }).locations;
+
+    if (!locations) return;
+
+    const { latitude, longitude } = locations[0].coords;
+    const config = await getAlarmConfig();
+
+    // Creates a new config excluding executed alarms
+    let newAlarmConfig: AlarmConfig = {
+        alarms: []
+    };
 
     for (const alarm of config.alarms) {
-        const distance = getDistance(coords.latitude, coords.longitude, alarm.lat, alarm.lon);
-
+        const distance = getDistance(latitude, longitude, alarm.lat, alarm.lon);
         if (distance <= alarm.radius) {
             await notifee.displayNotification({
                 title: alarm.displayName,
                 body: alarm.address,
                 android: {
-                    channelId: 'alarm', // ToDo: set up @notifee channel at App.tsx
-                    sound: 'default',
-                    importance: AndroidImportance.HIGH
+                    channelId: 'alarm',
+                    importance: AndroidImportance.HIGH,
+                    sound: 'alarm',
                 },
             });
-
-            const sound = new Audio.Sound();
-            await sound.loadAsync(require('../../assets/alarm.mp3'));
-            await sound.playAsync();
+        }
+        else {
+            newAlarmConfig.alarms.push(alarm);
         }
     }
-};
 
+    // Update alarm set excluding the triggered alarm
+    await setAlarmConfig(newAlarmConfig);
+});
