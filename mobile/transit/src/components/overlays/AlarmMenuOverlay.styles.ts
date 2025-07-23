@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 15,
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: 'rgba(0, 0, 0, 0)',
     shadowOpacity: 0.3,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   selectedItem: {
-    backgroundColor: '#2f2f2f',
+    backgroundColor: Colours.SELECTED_BAR,
   },
   leftIcon: {
     marginRight: 10,

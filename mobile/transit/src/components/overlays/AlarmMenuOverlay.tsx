@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import {Text,View,TouchableOpacity,Image,FlatList,} from 'react-native';
 import styles from './AlarmMenuOverlay.styles'; 
-
+import { X,Trash2,Pencil, Plus } from 'lucide-react-native';
 type Props = {
   visible: any;
   onClose: any;
@@ -45,6 +45,13 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
   const handleAddAlarm = () => {
     
   };
+  const handleDeleteAlarm = () => {
+    console.log('Delete alarm');
+  };
+  const handleEditAlarm = () => {
+    console.log('Edit alarm');
+  };
+
   const renderItem = ({ item }) => {
     const isSelected = selectedId === item.id;
 
@@ -54,11 +61,8 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
         style={[styles.alarmItem, isSelected && styles.selectedItem]}
         activeOpacity={0.9}
       >
-        <TouchableOpacity style={styles.leftIcon}>
-          <Image
-            source={require('../../assets/images/edit.png')}
-            style={styles.icon}
-          />
+        <TouchableOpacity onPress={() => handleEditAlarm()} style={styles.leftIcon}>
+          <Pencil size={24} strokeWidth={3} color="#333" />
         </TouchableOpacity>
 
         <View style={styles.textContainer}>
@@ -70,11 +74,8 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.deleteButton}>
-          <Image
-            source={require('../../assets/images/delete.png')}
-            style={[styles.trashIcon, isSelected && styles.selected_Trash]}
-          />
+        <TouchableOpacity onPress={() => handleDeleteAlarm()} style={styles.deleteButton}>
+          <Trash2 />
         </TouchableOpacity>
       </TouchableOpacity>
     );
@@ -85,12 +86,8 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
       <View style={styles.menuContainer}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>All Alarms</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Image
-              source={require('../../assets/images/close.png')}
-              style={styles.closeIcon}
-              resizeMode="contain"
-            />
+            <TouchableOpacity onPress={onClose}>
+            <X strokeWidth={2} size={36} />
           </TouchableOpacity>
         </View>
 
@@ -102,7 +99,7 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
         />
 
         <TouchableOpacity style={styles.addButton} onPress={onAddAlarm}>
-          <Image source={require('../../assets/images/add.png')} />
+          <Plus size={36} strokeWidth={3} style={{ marginBottom: 10 }} />
         </TouchableOpacity>
       </View>
     </View>
