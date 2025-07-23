@@ -54,6 +54,7 @@ export async function getAddressesFromCoordinates(location: Location): Promise<L
         throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json() as ReverseGeoCodingResultsDTO;
+    console.log("Google Maps API response:", data);
     if (data.status !== "OK") {
         throw new Error(`Reverse geocoding failed: ${data.status}`);
     }

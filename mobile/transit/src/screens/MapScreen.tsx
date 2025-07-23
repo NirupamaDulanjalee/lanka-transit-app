@@ -12,7 +12,34 @@ import SearchBarComponent from "../components/map/auxiliary/SearchBarComponent";
 import SelectLocationOverlay from "../components/overlays/SelectLocationOverlay";
 import AlarmControlOverlay from "../components/overlays/AlarmContolOverlay";
 import { MapPin } from "lucide-react-native";
+import { getAddressesFromCoordinates } from "../services/internal/LocationService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const MapScreen = ({ theme }) => {
+  const [showFab, setShowFab] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [alarmData, setAlarmData] = useState([
+    {
+      id: '1',
+      name: 'Location 1',
+      address: 'Galwala Road, Pothanegama...',
+    },
+    {
+      id: '2',
+      name: 'Location 2',
+      address: 'At Vessagiriya Road, 02 Can...',
+    },
+    {
+      id: '3',
+      name: 'Location 3',
+      address: '596, 69 Bandaranaike Mawa...',
+    },
+    {
+      id: '4',
+      name: 'Location 4',
+      address: '25/6, Colombo 04',
+    },
+  ]);
   // Track which overlay is active
   const [activeOverlay, setActiveOverlay] = useState<
     "none" | "alarmMenu" | "selectLocation" | "alarmControl"
@@ -24,9 +51,7 @@ const MapScreen = ({ theme }) => {
     longitudeDelta: 0.0421,
   });
 
-  const handleAlarmControlSave = () => {
-    setActiveOverlay("alarmMenu");
-  };
+
   const handlePress = () => {
     setActiveOverlay("alarmMenu");
   };
@@ -38,6 +63,30 @@ const MapScreen = ({ theme }) => {
   const handleAddAlarm = () => {
     setActiveOverlay("selectLocation");
   };
+    // Save alarm handler
+  const handleAlarmControlSave = (alarm) => {
+    setAlarmData(prev => [
+      ...prev,
+      alarm
+
+    ]);
+    setActiveOverlay("alarmMenu");
+  };
+
+  // Update selectedLocation when region changes
+  useEffect(() => {
+    setSelectedLocation({
+      longitude: region.longitude,
+      latitude: region.latitude,
+      
+      
+    });
+  }, [region]);
+  useEffect(() => {
+    if (activeOverlay === "selectLocation") {
+      setShowFab(false);
+    }
+  }, [activeOverlay]);
 
   return (
     <View style={styles.container}>
@@ -46,6 +95,7 @@ const MapScreen = ({ theme }) => {
         style={styles.map}
         initialRegion={region}
         region={region}
+        onPress={() => setShowFab(true)}
         onRegionChangeComplete={(newRegion) => {
           setRegion(newRegion);
           if (
@@ -75,14 +125,34 @@ const MapScreen = ({ theme }) => {
       {/* Show overlays based on state */}
       {activeOverlay === "selectLocation" && (
         <SelectLocationOverlay
+          showFab={showFab}
+          setShowFab={setShowFab}
           onSearch={handleClose}
-          onAdd={() => setActiveOverlay("alarmControl")}
+          onAdd={async () => {
+            if (selectedLocation) {
+              try {
+                const locations = await getAddressesFromCoordinates(
+                  selectedLocation
+                );
+                console.log("Selected location:", locations);
+                console.log("Locations found:", locations);
+                if (locations.length > 0) {
+                  setSelectedAddress(locations[0].address);
+                }
+              } catch (e) {
+                setSelectedAddress("Address not found");
+              }
+            }
+            setActiveOverlay("alarmControl");
+          }}
         />
       )}
       {activeOverlay === "alarmControl" && (
         <AlarmControlOverlay
           onClose={() => setActiveOverlay("selectLocation")}
           onSave={handleAlarmControlSave}
+          location={selectedAddress}
+          onEditLocation={() => setActiveOverlay("selectLocation")} 
         />
       )}
       {activeOverlay !== "alarmControl" && (
@@ -123,6 +193,8 @@ const MapScreen = ({ theme }) => {
         visible={activeOverlay === "alarmMenu"}
         onClose={handleClose}
         onAddAlarm={handleAddAlarm}
+        alarmData={alarmData} // Pass alarm list
+        setAlarmData={setAlarmData} // Pass setter for delete/edit
       />
     </View>
   );

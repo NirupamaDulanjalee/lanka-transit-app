@@ -134,11 +134,14 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   distanceUnit: {
-    fontSize: 18,
+    fontSize: 12,
     color: '#222',
     fontWeight: 'bold',
     textAlign: 'center',
     textDecorationLine: 'underline',
+    height:58,
+    width: 110,
+    backgroundColor: '#fff',
   },
   addDistance: {
     backgroundColor: '#bbdefb',

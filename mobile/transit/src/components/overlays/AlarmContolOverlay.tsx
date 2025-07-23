@@ -3,71 +3,97 @@
 // Can set and edit alarms with services/internal/AlarmService
 // Styled to match the app's theme
 // Envelopped in OverlayParent.tsx
-import React, { useState } from 'react';
-import {  Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
-import { Pencil,Trash2,ListX, Check, Plus, X  } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import styles from './AlarmContolOverlay.styles';
+import React, { useState, useEffect } from "react";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+} from "react-native";
+import { Pencil, Trash2, ListX, Check, Plus, X } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import styles from "./AlarmContolOverlay.styles";
+import { Picker } from "@react-native-picker/picker";
+
 // Main Alarm Component
-const AlarmControlOverlay = ({onClose,onSave}) => {
-  const [alarmName, setAlarmName] = useState('Location 1');
-  const [location, setLocation] = useState('Galwala Road, Pothanegama...');
+const AlarmControlOverlay = ({
+  onClose,
+  onSave,
+  location: propLocation,
+  onEditLocation,
+}) => {
+  const [alarmName, setAlarmName] = useState("Location");
+  const [location, setLocation] = useState("Galwala Road, Pothanegama...");
   const [distances, setDistances] = useState([
-    { id: 1, value: '5', unit: 'km' },
-    { id: 2, value: '678', unit: 'ft' }
+    { id: 1, value: "1", unit: "km" },
+
   ]);
+
+  useEffect(() => {
+    if (propLocation && propLocation !== location) {
+      setLocation(propLocation);
+      console.log("Location updated from prop:", propLocation);
+    }
+  }, [propLocation]);
 
   const handleSave = async () => {
     const alarmData = {
-    name: alarmName,
-    location: location , 
-    notifyingDistances: distances,
-  };
-  try {
-    
-    const existing = await AsyncStorage.getItem('alarmData');
-    const alarms = existing ? JSON.parse(existing) : [];
-    alarms.push(alarmData);
-    await AsyncStorage.setItem('alarmData', JSON.stringify(alarms));
-    console.log('Alarm saved successfully:', alarmData);
-if (onSave) {
-        onSave();
+      id: Date.now().toString(),
+      name: alarmName,
+      address: location,
+      notifyingDistances: distances,
+    };
+    try {
+      const existing = await AsyncStorage.getItem("alarmData");
+      const alarms = existing ? JSON.parse(existing) : [];
+      alarms.push(alarmData);
+      await AsyncStorage.setItem("alarmData", JSON.stringify(alarms));
+      console.log("Alarm saved successfully:", alarmData);
+      if (onSave) {
+        onSave(alarmData);
       }
-
-
-  } catch (e) {
-    console.error(e);
-  }
-};
+    } catch (e) {
+      console.error(e);
+    }
+  };
   const handleClose = () => {
     if (onClose) {
       onClose();
     }
-    console.log('Close alarm settings');
-
-  };
-
-  const handleLocationEdit = () => {
-    console.log('Edit location');
+    console.log("Close alarm settings");
   };
 
   const handleDeleteDistance = (id) => {
-    setDistances(distances.filter(distance => distance.id !== id));
+    setDistances(distances.filter((distance) => distance.id !== id));
   };
 
-  const handleRemoveDistances = () =>{
-    console.log('Remove all distances');
+  const handleRemoveDistances = () => {
+    console.log("Remove all distances");
   };
   const handleAddDistance = () => {
     const newDistance = {
       id: Date.now(),
-      value: '0',
-      unit: 'km'
+      value: "0",
+      unit: "km",
     };
     setDistances([...distances, newDistance]);
   };
 
+  const handleDistanceChange = (id, field, newValue) => {
+    setDistances(
+      distances.map((distance) =>
+        distance.id === id ? { ...distance, [field]: newValue } : distance
+      )
+    );
+  };
 
+  const handleLocationEdit = () => {
+  if (onEditLocation) {
+    onEditLocation(); // Switch to selectLocationOverlay
+  }
+  console.log("Edit location");
+};
 
   return (
     <View style={styles.overlay}>
@@ -105,12 +131,15 @@ if (onSave) {
           </View>
           <View style={styles.cellInputRow}>
             <Text style={styles.locationValue}>{location}</Text>
-            <TouchableOpacity onPress={handleLocationEdit} style={styles.pencilButton}>
+            <TouchableOpacity
+              onPress={handleLocationEdit}
+              style={styles.pencilButton}
+            >
               <Pencil size={24} strokeWidth={3} color="#333" />
             </TouchableOpacity>
           </View>
         </View>
-        
+
         <View style={styles.divider} />
 
         {/* Distances section */}
@@ -122,11 +151,14 @@ if (onSave) {
             </Text>
           </View>
           <TouchableOpacity onPress={handleRemoveDistances}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-
-           <ListX size={36} strokeWidth={2} style={{ marginBottom: 10 , marginLeft: 20 }} />
-          </View>
-        </TouchableOpacity>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <ListX
+                size={36}
+                strokeWidth={2}
+                style={{ marginBottom: 10, marginLeft: 20 }}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.distancesList}>
@@ -135,22 +167,44 @@ if (onSave) {
             contentContainerStyle={{ paddingBottom: 4 }}
             showsVerticalScrollIndicator={false}
           >
-            {distances.map(distance => (
+            {distances.map((distance) => (
               <View key={distance.id} style={styles.distanceItem}>
                 <View style={styles.distanceCol}>
-                  <Text style={styles.distanceValue}>{distance.value}</Text>
+                  <TextInput
+                    style={styles.distanceValue}
+                    value={distance.value}
+                    onChangeText={(text) =>
+                      handleDistanceChange(distance.id, "value", text)
+                    }
+                    keyboardType="numeric"
+                  />
                 </View>
                 <View style={styles.distanceCol}>
-                  <Text style={styles.distanceUnit}>{distance.unit}</Text>
+                  <Picker
+                    selectedValue={distance.unit}
+                    style={styles.distanceUnit}
+                    onValueChange={(itemValue) =>
+                      handleDistanceChange(distance.id, "unit", itemValue)
+                    }
+                    mode="dropdown"
+                  >
+                    <Picker.Item label="km" value="km" />
+                    <Picker.Item label="ft" value="ft" />
+                  </Picker>
                 </View>
-                <View >
-                  <TouchableOpacity onPress={() => handleDeleteDistance(distance.id)}>
+                <View>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteDistance(distance.id)}
+                  >
                     <Trash2 />
                   </TouchableOpacity>
                 </View>
               </View>
             ))}
-            <TouchableOpacity style={styles.addDistance} onPress={handleAddDistance}>
+            <TouchableOpacity
+              style={styles.addDistance}
+              onPress={handleAddDistance}
+            >
               <Plus size={36} strokeWidth={3} />
             </TouchableOpacity>
           </ScrollView>
@@ -167,6 +221,4 @@ if (onSave) {
   );
 };
 
-
 export default AlarmControlOverlay;
-

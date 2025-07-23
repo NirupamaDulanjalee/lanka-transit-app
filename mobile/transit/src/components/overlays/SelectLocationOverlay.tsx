@@ -3,15 +3,15 @@ import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import styles from './SelectLocationOverlay.styles';
 import { Plus } from 'lucide-react-native';
 
-const SelectLocationOverlay = ({ onSearch, onAdd }) => {
-    const [showFab,setShowFab] = React.useState(false);
+const SelectLocationOverlay = ({ showFab, setShowFab,onSearch, onAdd }) => {
+    // const [showFab,setShowFab] = React.useState(false);
 
     const handlePickLocation = () => {
         setShowFab(true);
     };
 
     const handleCancel = () => {
-
+        setShowFab(false);
         if (onSearch) {
             onSearch();
         }
@@ -30,9 +30,7 @@ const SelectLocationOverlay = ({ onSearch, onAdd }) => {
       {/* Centered label */}
       {!showFab && (
         <View style={styles.centerLabelContainer} pointerEvents="box-none">
-          <TouchableOpacity onPress={handlePickLocation} activeOpacity={0.7}>
-            <Text style={styles.centerLabel}>Pick a location</Text>
-          </TouchableOpacity>
+          <Text style={styles.centerLabel}>Pick a location</Text>
           <TouchableOpacity onPress={handleCancel} activeOpacity={0.7}>
             <Text style={styles.centerLabel}>Cancel</Text>
           </TouchableOpacity>

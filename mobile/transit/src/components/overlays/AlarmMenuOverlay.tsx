@@ -4,52 +4,36 @@
 // Works with services/internal/AlarmService
 // Envelopped in OverlayParent.tsx
 
-import React, { useState } from 'react';
-import {Text,View,TouchableOpacity,Image,FlatList,} from 'react-native';
-import styles from './AlarmMenuOverlay.styles'; 
-import { X,Trash2,Pencil, Plus } from 'lucide-react-native';
+import React, { useState } from "react";
+import { Text, View, TouchableOpacity, Image, FlatList } from "react-native";
+import styles from "./AlarmMenuOverlay.styles";
+import { X, Trash2, Pencil, Plus } from "lucide-react-native";
 type Props = {
   visible: any;
   onClose: any;
   onAddAlarm: () => void;
+  alarmData: any[];
+  setAlarmData: (data: any[]) => void;
 };
 
-const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
+const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm, alarmData, setAlarmData }: Props) => {
   // component
   const [selectedId, setSelectedId] = useState(null);
 
+  
   if (!visible) return null;
-
-  const alarmData = [
-    {
-      id: '1',
-      name: 'Location 1',
-      address: 'Galwala Road, Pothanegama...',
-    },
-    {
-      id: '2',
-      name: 'Location 2',
-      address: 'At Vessagiriya Road, 02 Can...',
-    },
-    {
-      id: '3',
-      name: 'Location 3',
-      address: '596, 69 Bandaranaike Mawa...',
-    },
-  ];
 
   const handleItemPress = (id) => {
     setSelectedId((prevId) => (prevId === id ? null : id));
   };
 
-  const handleAddAlarm = () => {
-    
-  };
-  const handleDeleteAlarm = () => {
-    console.log('Delete alarm');
+  const handleAddAlarm = () => {};
+  const handleDeleteAlarm = (id) => {
+    setAlarmData(alarmData.filter((item) => item.id !== id));
+    if (selectedId === id) setSelectedId(null);
   };
   const handleEditAlarm = () => {
-    console.log('Edit alarm');
+    console.log("Edit alarm");
   };
 
   const renderItem = ({ item }) => {
@@ -57,16 +41,27 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
 
     return (
       <TouchableOpacity
-        onPress={() => handleItemPress(item.id)}
+        onPress={() => {
+          handleItemPress(item.id);
+          onAddAlarm();
+        }}
         style={[styles.alarmItem, isSelected && styles.selectedItem]}
         activeOpacity={0.9}
       >
-        <TouchableOpacity onPress={() => handleEditAlarm()} style={styles.leftIcon}>
+        <TouchableOpacity
+          onPress={() => {
+            handleItemPress(item.id);
+            onAddAlarm();
+          }}
+          style={styles.leftIcon}
+        >
           <Pencil size={24} strokeWidth={3} color="#333" />
         </TouchableOpacity>
 
         <View style={styles.textContainer}>
-          <Text style={[styles.locationName, isSelected && styles.selectedText]}>
+          <Text
+            style={[styles.locationName, isSelected && styles.selectedText]}
+          >
             {item.name}
           </Text>
           <Text style={[styles.addressText, isSelected && styles.selectedText]}>
@@ -74,7 +69,10 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
           </Text>
         </View>
 
-        <TouchableOpacity onPress={() => handleDeleteAlarm()} style={styles.deleteButton}>
+        <TouchableOpacity
+          onPress={() => handleDeleteAlarm(item.id)}
+          style={styles.deleteButton}
+        >
           <Trash2 />
         </TouchableOpacity>
       </TouchableOpacity>
@@ -86,7 +84,7 @@ const AlarmMenuOverlay = ({ visible, onClose, onAddAlarm }: Props) => {
       <View style={styles.menuContainer}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>All Alarms</Text>
-            <TouchableOpacity onPress={onClose}>
+          <TouchableOpacity onPress={onClose}>
             <X strokeWidth={2} size={36} />
           </TouchableOpacity>
         </View>
